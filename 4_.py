@@ -21,6 +21,7 @@ n2 = 15
 n3 = 4  #output action size
 batch_size = 10
 total_episodes = 30000
+learning_rate = 0.008
 
 observation = tf.placeholder()  #observation = input state
 
@@ -36,22 +37,34 @@ def agent(observation):
     return tf.nn.softmax(tf.matmul(W3, h2) + b3)
 
 y = agent(observation)
+log_y = -tf.log(y)
 
 init = tf.global_variables_initializer()
 def main(argv):
     with tf.Session() as sess:
         sess.run(init)
-        reward
+        reward_sum = 0
+
         obsrv = env.reset() # Obtain an initial observation of the environment
         while episode_number <= total_episodes:
             # Run the policy network and get a distribution over actions
             action_probs = sess.run(y,feed_dict={observation: obsrv})
             # sample action from distribution
             action = np.argmax(np.multinomial(1,action_probs))
+
+            #calculate pi(action|observ)
+            policy = -tf.log(y)[action]
+
+            grad = tf.gradients(policy, obsrv)
+
             # step the environment and get new measurements
             obsrv, reward, done, info = env.step(action)
 
-            if done: 
+
+
+            if episode_number % batch_size == 0:
+                xxx = 4
+            if done:
                 episode_number += 1
                 obsrv = env.reset()
 
